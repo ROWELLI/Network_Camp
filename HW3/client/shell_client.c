@@ -59,16 +59,14 @@ int main(int argc, char *argv[])
             struct File f[20]; // File structure
 
             if (read(sock, &file_num, sizeof(int)) == -1) {
-                fprintf(stderr, "file number read failed");
-                exit(-1);
+                error_handling("file num read error!");
             }
 
             int get_struct = 0;
             while (get_struct < sizeof(struct File) * file_num) {
                 read_file = read(sock, ((char*)f) + get_struct, sizeof(struct File) * file_num - get_struct);
                 if (read_file <= 0) {
-                    fprintf(stderr, "file info read failed");
-                    exit(-1);
+                    error_handling("file info read error!");
                 }
                 get_struct += read_file;
             }
@@ -84,15 +82,14 @@ int main(int argc, char *argv[])
             while (1) {
                 printf("Choose a number of file to get (Quit: 0): ");
                 if (scanf("%d", &file_index) != 1) {
-                    fprintf(stderr, "Invalid input\n");
+                    error_handling("Invalid input error");
                 }
 
                 // scanf를 사용한 후 개행 문자를 제거하기 위해 getchar를 사용합니다.
                 dummy = getchar();
 
                 if (write(sock, &file_index, sizeof(int)) == -1) {
-                    fprintf(stderr, "file index write failed");
-                    exit(-1);
+                    error_handling("file index write error!");
                 }
 
                 if (file_index == 0) {
@@ -101,8 +98,7 @@ int main(int argc, char *argv[])
 
                 int file_size;
                 if (read(sock, &file_size, sizeof(int)) == -1) {
-                    fprintf(stderr, "file size read failed\n");
-                    exit(-1);
+                    error_handling("file size read error!");
                 }
 
                 if (file_size == -1) {
@@ -116,8 +112,7 @@ int main(int argc, char *argv[])
                 while (total_received < file_size) {
                     read_cnt = read(sock, buf, BUF_SIZE);
                     if (read_cnt == -1) {
-                        fprintf(stderr, "file read failed\n");
-                        exit(-1);
+                        error_handling("file read error!");
                     }
                     fwrite(buf, 1, read_cnt, fp);
                     total_received += read_cnt;
@@ -146,16 +141,14 @@ void cmd_ls(int sock, char *message) {
     struct File f[20]; // File structure
 
     if (read(sock, &file_num, sizeof(int)) == -1) {
-        fprintf(stderr, "file number read failed");
-        exit(-1);
+        error_handling("file num read error!");
     }
 
     int get_struct = 0;
     while (get_struct < sizeof(struct File) * file_num) {
         read_file = read(sock, ((char*)f) + get_struct, sizeof(struct File) * file_num - get_struct);
         if (read_file <= 0) {
-            fprintf(stderr, "file info read failed");
-            exit(-1);
+            error_handling("file info read error!");
         }
         get_struct += read_file;
     }
@@ -175,13 +168,12 @@ void cmd_ul(int sock, char *file_name) {
 
     fp = fopen(file_name, "rb");
     if (fp == NULL) {
-        perror("fopen() error");
-        return;
+        error_handling("file open error!");
     }
 
     // 파일 이름 전송
     if (write(sock, file_name, BUF_SIZE) <= 0) {
-        perror("file name write error");
+        error_handling("file name write error!");
         fclose(fp);
         return;
     }
@@ -194,7 +186,7 @@ void cmd_ul(int sock, char *file_name) {
 
     // 파일 크기 전송
     if (write(sock, &file_size, sizeof(int)) <= 0) {
-        perror("file size write error");
+        error_handling("file size write error!");
         fclose(fp);
         return;
     }
@@ -206,7 +198,7 @@ void cmd_ul(int sock, char *file_name) {
         while (sent < read_cnt) {
             int n = write(sock, buf + sent, read_cnt - sent);
             if (n == -1) {
-                perror("file content write error");
+                error_handling("file write error!");
                 fclose(fp);
                 return;
             }
