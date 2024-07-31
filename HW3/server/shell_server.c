@@ -138,7 +138,7 @@ void cmd_ls(int clnt_sock, char *cur_dir) {
         char filepath[BUF_SIZE];
         strcpy(filepath, cur_dir);
         strcat(filepath, "/");
-        strcat(filepath, dir->d_name); // 파일 경로 생성
+        strcat(filepath, dir->d_name); 
         if (stat(filepath, &sb) == -1) {
             error_handling("stat error");
         }
@@ -296,7 +296,7 @@ void cmd_dl(int clnt_sock, char *cur_dir) {
         char filepath[BUF_SIZE];
         strcpy(filepath, cur_dir);
         strcat(filepath, "/");
-        strcat(filepath, f[file_index - 1].fname); // 파일 경로 생성
+        strcat(filepath, f[file_index - 1].fname); 
         fp = fopen(filepath, "rb");
         if (fp == NULL) {
             // 파일 열기 오류를 클라이언트에 전송
