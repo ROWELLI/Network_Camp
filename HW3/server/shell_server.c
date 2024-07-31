@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     int serv_sock, clnt_sock;
     struct sockaddr_in serv_adr, clnt_adr;
     socklen_t adr_sz;
-    char server_dir[BUF_SIZE];  // 서버 디렉토리
+    char server_dir[BUF_SIZE]; 
     pthread_t t_id;
 
     if (argc != 2) {
@@ -167,22 +167,17 @@ void cmd_ls(int clnt_sock, char *cur_dir) {
 
 
 void cmd_cd(int clnt_sock, char *cur_dir, char *dir_name) {
-    // dir_name에서 뒤쪽 공백이나 줄바꿈 문자를 제거합니다.
     dir_name[strcspn(dir_name, "\r\n")] = 0; // '\r'이나 '\n' 문자를 찾아서 그 위치를 문자열의 끝으로 설정
 
     char new_dir[BUF_SIZE];
-
-    // 'cd ..' 처리
     if (strcmp(dir_name, "..") == 0) {
-        // 상위 디렉토리로 이동
         if (chdir("..") == -1) {
             error_handling("chdir() error");
         }
     } else {
-        // 다른 디렉토리로 이동
         strcpy(new_dir, cur_dir);
         strcat(new_dir, "/");
-        strcat(new_dir, dir_name); // 새로운 디렉토리 경로 생성
+        strcat(new_dir, dir_name);
         if (chdir(new_dir) == -1) {
             error_handling("chdir() error");
         }
@@ -193,7 +188,7 @@ void cmd_cd(int clnt_sock, char *cur_dir, char *dir_name) {
         error_handling("getcwd() error");
     }
 
-    printf("Directory changed to: %s\n", cur_dir);  // 현재 디렉토리 경로 업데이트
+    printf("Directory changed to: %s\n", cur_dir);
 }
 
 void cmd_ul(int clnt_sock, char *cur_dir) {
@@ -219,7 +214,7 @@ void cmd_ul(int clnt_sock, char *cur_dir) {
     char file_path[BUF_SIZE];
     strcpy(file_path, cur_dir);
     strcat(file_path, "/");
-    strcat(file_path, file_name); // 파일 경로 생성
+    strcat(file_path, file_name);
     fp = fopen(file_path, "wb");
 
     // 파일 내용 읽기
@@ -241,8 +236,8 @@ void cmd_ul(int clnt_sock, char *cur_dir) {
 void cmd_dl(int clnt_sock, char *cur_dir) {
     DIR *dp;
     struct dirent *dir;
-    struct File f[20]; // File structure
-    struct stat sb; // include stat
+    struct File f[20]; 
+    struct stat sb; 
 
     // 현재 디렉토리 열기
     if ((dp = opendir(cur_dir)) == NULL) {
@@ -259,7 +254,7 @@ void cmd_dl(int clnt_sock, char *cur_dir) {
         char filepath[BUF_SIZE];
         strcpy(filepath, cur_dir);
         strcat(filepath, "/");
-        strcat(filepath, dir->d_name);  // 파일 경로 생성
+        strcat(filepath, dir->d_name);  
         if (stat(filepath, &sb) == -1) {
             error_handling("stat() error");
         }
@@ -307,12 +302,12 @@ void cmd_dl(int clnt_sock, char *cur_dir) {
             // 파일 열기 오류를 클라이언트에 전송
             int error_code = -1;
             if (write(clnt_sock, &error_code, sizeof(int)) == -1) {
-                error_handling("file open error message send error");
+                error_handling("message send error");
             }
             continue;
         }
 
-        // 정상적인 파일 전송
+        // 파일 전송
         int file_size = f[file_index - 1].fsize;
         if (write(clnt_sock, &file_size, sizeof(int)) == -1) {
             error_handling("file size send error");

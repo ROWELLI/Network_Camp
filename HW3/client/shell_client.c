@@ -78,16 +78,11 @@ int main(int argc, char *argv[])
             int file_index, read_cnt;
             FILE *fp;
             char buf[BUF_SIZE];
-            char dummy;
             while (1) {
                 printf("Choose a number of file to get (Quit: 0): ");
                 if (scanf("%d", &file_index) != 1) {
                     error_handling("Invalid input error");
                 }
-
-                // scanf를 사용한 후 개행 문자를 제거하기 위해 getchar를 사용합니다.
-                dummy = getchar();
-
                 if (write(sock, &file_index, sizeof(int)) == -1) {
                     error_handling("file index write error!");
                 }
@@ -138,7 +133,7 @@ int main(int argc, char *argv[])
 
 void cmd_ls(int sock, char *message) {
     int file_num, read_file;
-    struct File f[20]; // File structure
+    struct File f[20]; 
 
     if (read(sock, &file_num, sizeof(int)) == -1) {
         error_handling("file num read error!");
@@ -182,7 +177,7 @@ void cmd_ul(int sock, char *file_name) {
     fseek(fp, 0, SEEK_END);
     int file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    printf("File size: %d bytes\n", file_size); // Debug print
+    printf("File size: %d bytes\n", file_size); 
 
     // 파일 크기 전송
     if (write(sock, &file_size, sizeof(int)) <= 0) {
