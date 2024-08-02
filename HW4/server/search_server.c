@@ -161,7 +161,7 @@ void sort_letter(const char* letter, int clnt_sd, const char* filename) {
     Top10 top10[10];
 
     int top_count = (filtered_count < 10) ? filtered_count : 10;
-    printf("Filtered and sorted entries:\n");
+    printf("sorted:\n");
     for (int i = 0; i < top_count; i++) {
         strcpy(top10[i].input, letter);
         strcpy(top10[i].search_result, match_result[i].text);
