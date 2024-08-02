@@ -8,7 +8,6 @@
 
 #define BUF_SIZE 100
 #define MAX_LINES 1000
-#define BACKSPACE 127 // 터미널에서 백스페이스 ASCII 값
 
 void error_handling(char *message);
 void *read_write_letter(void *arg);
@@ -44,7 +43,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    filename = argv[2]; // 전역 변수에 파일 이름 저장
+    filename = argv[2];
 
     serv_sd = socket(PF_INET, SOCK_STREAM, 0);
     if (serv_sd == -1)
@@ -88,9 +87,9 @@ void *read_write_letter(void *arg) {
             break;
         }
 
-        if (let == BACKSPACE) {
+        if (let == 127) {
             if (len > 0) {
-                letter[--len] = '\0'; // 문자열 끝부분 제거
+                letter[--len] = '\0'; 
             }
             if (len == 0) {
                 Top10 type_input;
@@ -126,10 +125,9 @@ void sort_letter(const char* letter, int clnt_sd, const char* filename) {
 
     // 파일을 읽어서 구조체 배열에 저장
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        // 문자열과 숫자를 파싱
-        char *ptr = strrchr(buffer, ' '); // 마지막 공백을 찾음
+        char *ptr = strrchr(buffer, ' ');
         if (ptr != NULL) {
-            *ptr = '\0'; // 문자열과 숫자를 분리
+            *ptr = '\0'; 
             entries[count].number = atoi(ptr + 1);
             strcpy(entries[count].text, buffer);
             count++;
@@ -138,36 +136,37 @@ void sort_letter(const char* letter, int clnt_sd, const char* filename) {
     fclose(file);
 
     // 입력된 문자를 포함하는 항목 필터링
-    Entry filtered_entries[MAX_LINES];
+    Entry match_result[MAX_LINES];
     int filtered_count = 0;
     for (int i = 0; i < count; i++) {
         if (strstr(entries[i].text, letter) != NULL) {
-            filtered_entries[filtered_count++] = entries[i];
+            match_result[filtered_count++] = entries[i];
         }
     }
 
-    // 필터링된 항목이 없을 경우
+    // 입력이 다 지워졌을 경우
     if (filtered_count == 0) {
-        Top10 nothing_found;
-        strcpy(nothing_found.input, letter);
-        strcpy(nothing_found.search_result, "Nothing found");
-        nothing_found.result_num = 0;
-        write(clnt_sd, &nothing_found, sizeof(Top10));
+        Top10 no_type;
+        strcpy(no_type.input, letter);
+        strcpy(no_type.search_result, "Nothing found");
+        no_type.result_num = 0;
+        write(clnt_sd, &no_type, sizeof(Top10));
         return;
     }
 
     // 내림차순 정렬
-    qsort(filtered_entries, filtered_count, sizeof(Entry), compare);
+    qsort(match_result, filtered_count, sizeof(Entry), compare);
 
-    // 정렬된 배열 출력 및 클라이언트로 전송
+    // 정렬된 배열 전송
     Top10 top10[10];
+
     int top_count = (filtered_count < 10) ? filtered_count : 10;
     printf("Filtered and sorted entries:\n");
     for (int i = 0; i < top_count; i++) {
         strcpy(top10[i].input, letter);
-        strcpy(top10[i].search_result, filtered_entries[i].text);
-        top10[i].result_num = filtered_entries[i].number;
-        printf("%s %d\n", filtered_entries[i].text, filtered_entries[i].number);
+        strcpy(top10[i].search_result, match_result[i].text);
+        top10[i].result_num = top_count;
+        printf("%s %d\n", match_result[i].text, match_result[i].number);
     }
     write(clnt_sd, top10, sizeof(Top10) * top_count);
 }

@@ -7,13 +7,14 @@
 #include <termios.h>
 
 #define BUF_SIZE 1
-#define BACKSPACE 127 // 터미널에서 백스페이스 ASCII 값
+#define COLOR_RED "\033[38;2;255;0;0m"
+#define COLOR_RESET "\033[0m"
 
 void error_handling(char *message);
 
 typedef struct {
-    char input[100]; // BUF_SIZE를 100으로 증가
-    char search_result[100]; // BUF_SIZE를 100으로 증가
+    char input[100]; 
+    char search_result[100]; 
     int result_num;
 } Top10;
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
     }
 
     tcgetattr(STDIN_FILENO, &tattr);
-    tattr.c_lflag &= ~(ICANON | ECHO); // Canonical 모드 비활성화, 입력 문자 출력 비활성화
+    tattr.c_lflag &= ~(ICANON | ECHO);
     tattr.c_cc[VMIN] = 1;
     tattr.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &tattr);
@@ -59,21 +60,32 @@ int main(int argc, char *argv[]) {
         if (let == '\n') {
             break;
         }
-
-        Top10 top10[10]; // 최대 10개의 결과를 받을 수 있도록 설정
+        Top10 top10[10]; 
         int read_cnt = read(sd, top10, sizeof(top10));
+        printf("%d", top10[0].result_num);
         if (read_cnt > 0) {
+            printf("\033[2J\033[H");
+            printf("Input: %s%s%s\n", COLOR_RED, top10[0].input, COLOR_RESET);
+            printf("---------------------\n");
+
             for (int i = 0; i < read_cnt / sizeof(Top10); i++) {
                 if (strcmp(top10[i].search_result, "Type input") == 0) {
-                    printf("Type input\n");
-                } else if (strcmp(top10[i].search_result, "Nothing found") == 0) {
-                    printf("Input: %s, Nothing found\n", top10[i].input);
-                } else {
-                    printf("Input: %s, Result: %s %d\n", top10[i].input, top10[i].search_result, top10[i].result_num);
+                    printf("%s\n", top10[i].search_result);
+                    continue;
                 }
+                int input_len = strlen(top10[0].input);
+                int result_len = strlen(top10[i].search_result);
+                for (int j = 0; j < result_len; j++) {
+                    if (j <= result_len - input_len && strncmp(&top10[i].search_result[j], top10[0].input, input_len) == 0) {
+                        printf("%s%.*s%s", COLOR_RED, input_len, &top10[i].search_result[j], COLOR_RESET);
+                        j += input_len - 1;
+                    } else {
+                        putchar(top10[i].search_result[j]);
+                    }
+                }
+                printf("\n");
             }
         }
-        printf("서버 응답: %c\n", let);
     }
 
     close(sd);
