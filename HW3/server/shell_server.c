@@ -317,7 +317,7 @@ void cmd_dl(int clnt_sock, char *cur_dir) {
         while ((read_cnt = fread((void*)buf, 1, BUF_SIZE, fp)) > 0) {
             int sent = 0;
             while (sent < read_cnt) {
-                int n = write(clnt_sock, buf + sent, read_cnt - sent);
+                int n = write(clnt_sock, buf, read_cnt);
                 if (n == -1) {
                     error_handling("file send error");
                     fclose(fp);
