@@ -47,7 +47,7 @@ void set_random_positions(int player_number, int size, struct player *players, s
 
 struct player players[BUF_SIZE];
 struct board_info b_info;
-struct game_info g_info[BUF_SIZE];
+struct game_info g_info; // 배열이 아닌 단일 구조체로 변경
 
 int *clnt_sds; // 여러 클라이언트 정보 저장
 pthread_mutex_t mutex;
@@ -133,14 +133,8 @@ int main(int argc, char *argv[]) {
         players[i].team = (i % 2 != 0) ? 1 : 2;
     }
 
-    set_random_board(s, b, &g_info[0]);
-    set_random_positions(n, s, players, &g_info[0]);
-
-    // 다른 플레이어들에게 동일한 보드를 복사
-    for (int i = 1; i < n; i++) {
-        memcpy(g_info[i].board, g_info[0].board, sizeof(g_info[0].board));
-        g_info[i].player_id = i;
-    }
+    set_random_board(s, b, &g_info);
+    set_random_positions(n, s, players, &g_info);
 
     // 클라이언트 별로 thread 생성
     for (int i = 0; i < n; i++) {
@@ -204,7 +198,7 @@ void *handle_client(void *arg) {
     // game_info 전송
     total = 0;
     while (total < sizeof(struct game_info)) {
-        sent = write(clnt_sd, ((char *)&g_info[client_id]) + total, sizeof(struct game_info) - total);
+        sent = write(clnt_sd, ((char *)&g_info) + total, sizeof(struct game_info) - total);
         if (sent == -1) {
             error_handling("write() error: game_info");
         }
@@ -247,10 +241,10 @@ void *handle_client(void *arg) {
         else if (key_buf[0] == 'E') {
             x = players[client_id].x;
             y = players[client_id].y;
-            if (g_info[0].board[y][x] == 1) {
-                g_info[0].board[y][x] = 2; // 빨간색에서 파란색으로 변경
-            } else if (g_info[0].board[y][x] == 2) {
-                g_info[0].board[y][x] = 1; // 파란색에서 빨간색으로 변경
+            if (g_info.board[y][x] == 1) {
+                g_info.board[y][x] = 2; // 빨간색에서 파란색으로 변경
+            } else if (g_info.board[y][x] == 2) {
+                g_info.board[y][x] = 1; // 파란색에서 빨간색으로 변경
             }
             flag = 1;
         }
@@ -270,7 +264,7 @@ void *handle_client(void *arg) {
 
                 total = 0;
                 while (total < sizeof(struct game_info)) {
-                    sent = write(clnt_sds[i], ((char *)&g_info[0]) + total, sizeof(struct game_info) - total);
+                    sent = write(clnt_sds[i], ((char *)&g_info) + total, sizeof(struct game_info) - total);
                     if (sent == -1) {
                         error_handling("write() error: game_info update");
                     }
@@ -313,6 +307,7 @@ void set_random_board(int size, int board_num, struct game_info *g_info) {
     }
 }
 
+// 초기 랜덤 포지션 세팅
 void set_random_positions(int player_number, int size, struct player *players, struct game_info *g_info) {
     srand(time(NULL));
     int occupied[BUF_SIZE][BUF_SIZE] = {0}; // 중복 위치 방지를 위한 보드
