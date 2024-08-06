@@ -47,7 +47,7 @@ void set_random_positions(int player_number, int size, struct player *players, s
 
 struct player players[BUF_SIZE];
 struct board_info b_info;
-struct game_info g_info; // 배열이 아닌 단일 구조체로 변경
+struct game_info g_info;
 
 int *clnt_sds; // 여러 클라이언트 정보 저장
 pthread_mutex_t mutex;
@@ -250,7 +250,7 @@ void *handle_client(void *arg) {
         }
         pthread_mutex_unlock(&mutex);
 
-        // 변경사항이 있는 경우 모든 클라이언트에게 브로드캐스트
+        // 변경사항이 있는 경우 모든 클라이언트에게 알림
         if (flag) {
             for (int i = 0; i < b_info.player_number; i++) {
                 total = 0;

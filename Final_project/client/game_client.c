@@ -144,9 +144,9 @@ int main(int argc, char *argv[]) {
     keypad(stdscr, TRUE); // 방향키 입력을 받기 위해 keypad 활성화
 
     // 서버에서 업데이트된 정보를 읽기 스레드 생성
-    pthread_t t_id;
-    pthread_create(&t_id, NULL, update_state, &sd);
-    pthread_detach(t_id);
+    pthread_t update_thread;
+    pthread_create(&update_thread, NULL, update_state, &sd);
+    pthread_detach(update_thread);
 
     while (game_running) {
         int ch = getch();
@@ -210,8 +210,6 @@ void *update_state(void *arg) {
             total += received;
         }
 
-        if (!game_running) break;
-
         // 게임 정보 업데이트(색상 변화 여부)
         total = 0;
         while (total < sizeof(g_info)) {
@@ -222,8 +220,6 @@ void *update_state(void *arg) {
             }
             total += received;
         }
-
-        if (!game_running) break;
 
         // 화면 상태
         clear();
