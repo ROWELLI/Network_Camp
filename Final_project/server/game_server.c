@@ -11,7 +11,6 @@
 #define KEY_BUF_SIZE 5
 
 void error_handling(char *message);
-void *handle_client(void *arg);
 
 // 플레이어 정보
 struct player {
@@ -42,6 +41,7 @@ struct game_info {
     int player_id;
 };
 
+void *handle_client(void *arg);
 void set_random_board(int size, int board_num, struct game_info *g_info);
 void set_random_positions(int player_number, int size, struct player *players, struct game_info *g_info);
 
@@ -248,6 +248,7 @@ void *handle_client(void *arg) {
             }
             flag = 1;
         }
+
         pthread_mutex_unlock(&mutex);
 
         // 변경사항이 있는 경우 모든 클라이언트에게 알림
@@ -299,7 +300,8 @@ void set_random_board(int size, int board_num, struct game_info *g_info) {
             if (count1 < board_num/2) {
                 g_info->board[x][y] = 1;
                 count1++;
-            } else if (count2 < board_num/2) {
+            } 
+            else if (count2 < board_num/2) {
                 g_info->board[x][y] = 2;
                 count2++;
             }
@@ -314,10 +316,10 @@ void set_random_positions(int player_number, int size, struct player *players, s
 
     for (int i = 0; i < player_number; i++) {
         int x, y;
-        do {
+        while (occupied[x][y]){
             x = rand() % size;
             y = rand() % size;
-        } while (occupied[x][y]); // 이미 차지된 위치인지 확인
+        } // 이미 차지된 위치인지 확인
 
         players[i].x = x;
         players[i].y = y;

@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 
     // 보드 크기 계산
     cell_width = term_width / b_info.room_width;
-    cell_height = (term_height - 12) / b_info.room_height; // 12 줄은 정보 및 타이머 출력용
+    cell_height = (term_height - 12) / b_info.room_height;
 
     // 게임 보드 표시
     display_board(&g_info, cell_width, cell_height, p, client_id);
@@ -259,7 +259,8 @@ void display_info(struct player *p, int client_id) {
         if (p[i].player_id == client_id) { // 내 정보 표시
             mvprintw(8 + i, 0, "==> Your Information: Player ID: %d, Team: %s, Position: (%d, %d) <==", 
                      p[i].player_id, (p[i].team == 1) ? "Red" : "Blue", p[i].x, p[i].y);
-        } else {
+        } 
+        else {
             mvprintw(8 + i, 0, "Player ID: %d, Team: %s, Position: (%d, %d)", p[i].player_id, 
                      (p[i].team == 1) ? "Red" : "Blue", p[i].x, p[i].y);
         }
@@ -275,7 +276,8 @@ void display_result() {
         for (int j = 0; j < b_info.room_width; j++) {
             if (g_info.board[i][j] == 1) {
                 red_count++;
-            } else if (g_info.board[i][j] == 2) {
+            } 
+            else if (g_info.board[i][j] == 2) {
                 blue_count++;
             }
         }
@@ -284,9 +286,11 @@ void display_result() {
     clear();
     if (red_count > blue_count) {
         mvprintw(0, 0, "Red team wins!");
-    } else if (blue_count > red_count) {
+    } 
+    else if (blue_count > red_count) {
         mvprintw(0, 0, "Blue team wins!");
-    } else {
+    } 
+    else {
         mvprintw(0, 0, "It's a draw!");
     }
 
@@ -307,11 +311,13 @@ void display_board(struct game_info *g_info, int cell_width, int cell_height, st
                         attron(COLOR_PAIR(1));
                         mvprintw(10 + i * cell_height + y, j * cell_width + x, " ");
                         attroff(COLOR_PAIR(1));
-                    } else if (g_info->board[i][j] == 2) {
+                    } 
+                    else if (g_info->board[i][j] == 2) {
                         attron(COLOR_PAIR(2));
                         mvprintw(10 + i * cell_height + y, j * cell_width + x, " ");
                         attroff(COLOR_PAIR(2));
-                    } else {
+                    } 
+                    else {
                         attron(COLOR_PAIR(3));
                         mvprintw(10 + i * cell_height + y, j * cell_width + x, " ");
                         attroff(COLOR_PAIR(3));
@@ -327,11 +333,13 @@ void display_board(struct game_info *g_info, int cell_width, int cell_height, st
             attron(COLOR_PAIR(6));
             mvprintw(10 + players[i].y * cell_height, players[i].x * cell_width, "P");
             attroff(COLOR_PAIR(6));
-        } else if (players[i].team == 1) { // 빨간 팀
+        } 
+        else if (players[i].team == 1) { // 빨간 팀
             attron(COLOR_PAIR(5));
             mvprintw(10 + players[i].y * cell_height, players[i].x * cell_width, "P");
             attroff(COLOR_PAIR(5));
-        } else { // 파란 팀
+        } 
+        else { // 파란 팀
             attron(COLOR_PAIR(4));
             mvprintw(10 + players[i].y * cell_height, players[i].x * cell_width, "P");
             attroff(COLOR_PAIR(4));
